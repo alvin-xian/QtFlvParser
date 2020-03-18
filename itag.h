@@ -40,13 +40,15 @@ public:
     }
     typedef unsigned char uint24[3];
     //11个字节的tagheader
+
+#pragma pack(1)
     struct TagHeader{
         char type;
         uint24 size;
         uint24 timestamp;
         char timestamp_ex;
         uint24 steamid;
-        TagHeader &operator =(TagHeader &other){
+        TagHeader &operator =(const TagHeader &other){
             this->type = other.type;
             memcpy(this->size, other.size, sizeof(uint24));
             memcpy(this->timestamp, other.timestamp, sizeof(uint24));
@@ -55,19 +57,18 @@ public:
             return *this;
         }
     };
-    static int uint24ToInt(uint24 d){
-        //qDebug()<<"uint24ToInt:(1<<16)"<<(1<<16)<<"(1<<8)"<<(1<<8);
+    static quint32 uint24ToInt(uint24 d){
         return d[0]*(1<<16)+d[1]*(1<<8)+d[2];
     }
 
     virtual Type type() = 0;
-    virtual int size();
-    virtual int metaDataSize(){return size() - 11;}
+    virtual quint32 size();
+    virtual quint32 metaDataSize(){return size() - 11;}
     quint32 timeStamp() const;
     quint32 steamid();
 
     static ITag *CreateTag(const QByteArray &raw);
-    static TagHeader &peekTagHeader(const QByteArray &raw);
+    static TagHeader peekTagHeader(const QByteArray &raw);
 protected:
     QByteArray m_rawData;
     TagHeader m_header;

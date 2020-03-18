@@ -9,11 +9,12 @@ ITag::ITag(const QByteArray &raw):QObject()
 {
     m_rawData = raw;
     m_header = peekTagHeader(raw);
+    Q_ASSERT(uint24ToInt(m_header.size) == ( m_rawData.size()-11));
 }
 
-int ITag::size(){
+quint32 ITag::size(){
     Q_ASSERT(uint24ToInt(m_header.size) == ( m_rawData.size()-11));
-    return m_rawData.size();
+    return uint24ToInt(m_header.size)+11;
 }
 
 quint32 ITag::timeStamp() const
@@ -60,15 +61,16 @@ ITag *ITag::CreateTag(const QByteArray &raw)
     return Q_NULLPTR;
 }
 
-ITag::TagHeader &ITag::peekTagHeader(const QByteArray &raw)
+ITag::TagHeader ITag::peekTagHeader(const QByteArray &raw)
 {
     TagHeader header;
     Q_ASSERT(sizeof(header) == 11);
     memset(&header, 0, sizeof(header));
     if(raw.size() < sizeof(header)){
+        qWarning()<<"peekTagHeader error! raw.size() not enough"<<raw.size();
         return header;
     }
-    QByteArray headerarray = raw.left(sizeof(header));
+    QByteArray headerarray = raw.left(11);
     memcpy(&header, headerarray.constData(), sizeof(header));
     return header;
 }

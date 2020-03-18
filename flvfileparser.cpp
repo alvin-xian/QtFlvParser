@@ -50,10 +50,12 @@ void FlvFileParser::parserHeader()
     m_flvHeader = new FlvHeader(data);
 }
 
+#include <QApplication>
 void FlvFileParser::parserAllTag()
 {
     QByteArray data = m_flvFile->readAll();
     while(1){
+        QApplication::processEvents();
         ITag *tag = getOneTag(data);
         if(!tag||m_packagets.size()>3000){
             break;
@@ -85,7 +87,6 @@ ITag *FlvFileParser::getOneTag(QByteArray &data)
     }
     //前一个数据的大小，占四个字节
     QByteArray presize = data.mid(0,4);
-//    qDebug()<<"tag presize"<<bytesToInt(presize);
     data.remove(0,4);
 
     //探嗅tag头，获取tag的长度。
